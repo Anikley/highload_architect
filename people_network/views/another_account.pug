@@ -1,0 +1,119 @@
+html
+  head
+    title= 'PeopleNetwork'
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css',
+                           integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh',
+                           crossorigin= 'anonymous')
+    style
+      include style.css
+    script(src='https://code.jquery.com/jquery-3.4.1.slim.min.js')
+    script(src='https://getbootstrap.com/docs/4.4/dist/js/bootstrap.bundle.min.js')
+
+  body
+
+      h1= 'Страница пользователя'
+
+a(href='/' ) Назад на мою страницу
+br
+br
+br
+br
+br
+br
+br
+form(method='POST' action='/createRels')
+
+    div.block
+        span.innerlabel Имя
+        span.innerinputreadonly
+            input.text(
+                type='text'
+                name='name'
+                readonly="readonly"
+                value= `${Name}`
+                )
+
+    div.block
+        span.innerlabel Отчество
+        span.innerinputreadonly
+            input.text(
+                type='text'
+                name='patronymic'
+                readonly="readonly"
+                value= `${Patronymic === null ? '' : Patronymic}`
+                )
+
+    div.block
+        span.innerlabel Фамилия
+        span.innerinputreadonly
+            input.text(
+                type='text'
+                name='lastName'
+                readonly="readonly"
+                value= `${LastName}`
+                )
+
+    div.block
+        span.innerlabel День рождения
+        span.innerinputreadonly
+            input.text(
+                type='text'
+                name='birth'
+                readonly="readonly"
+                value= `${Birth}`
+                )
+
+    div.block
+        span.innerlabel Пол
+        span.innerinputreadonly
+            input.text(
+                type='text'
+                name='gender'
+                readonly="readonly"
+                value= `${Gender}`
+                )
+
+    div.block
+        span.innerlabel Город
+        span.innerinputreadonly
+            input.text(
+                type='text'
+                name='town'
+                readonly="readonly"
+                value= `${Town}`
+                )
+
+    div.block
+        span.innerlabel Интересы
+        span.innerinputreadonly
+            input.text(
+                type='text'
+                name='hobbies'
+                readonly="readonly"
+                value= `${Hobbies}`
+                )
+
+    input.text(
+        type='hidden'
+        name='login'
+        value= `${Login}`
+        )
+
+
+    input.text(
+        type='hidden'
+        name='myLogin'
+        value= `${MyLogin}`
+        )
+
+
+    input.text(
+        type='hidden'
+        name='friendsState'
+        value= `${FriendsState}`
+        )
+
+    if FriendsState == 1
+       button.btn.btn-primary(type='submit') Раздружиться?
+    else
+        button.btn.btn-primary(type='submit') Подружиться?

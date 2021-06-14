@@ -1,0 +1,27 @@
+html
+  head
+    title= 'PeopleNetwork'
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css',
+                           integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh',
+                           crossorigin= 'anonymous')
+    style
+      include style.css
+    script(src='https://code.jquery.com/jquery-3.4.1.slim.min.js')
+    script(src='https://getbootstrap.com/docs/4.4/dist/js/bootstrap.bundle.min.js')
+
+  body
+    h1= 'Люди'
+    a(href='/' ) Назад на мою страницу
+
+  br
+  br
+  ul
+  each element in listOfPersons
+    br
+    div
+      div
+        el=`${element.Login} `
+      div
+        a(href='/' + url + `/${element.Login}` ) Показать подробную информацию
+    br
+

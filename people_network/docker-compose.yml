@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  web:
+    image: "people-network"
+    container_name: "web"
+    restart: "no"
+    ports:
+      - 3000:3000
+    networks:
+      - overlay
+
+networks:
+  overlay:
+

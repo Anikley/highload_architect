@@ -1,0 +1,99 @@
+html
+  head
+    title= 'PeopleNetwork'
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css',
+                           integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh',
+                           crossorigin= 'anonymous')
+    style
+      include style.css
+    script(src='https://code.jquery.com/jquery-3.4.1.slim.min.js')
+    script(src='https://getbootstrap.com/docs/4.4/dist/js/bootstrap.bundle.min.js')
+  body
+
+
+h1= 'Моя страницa'
+
+
+form(method='POST' action='/personUpdate')
+
+    a(href=`/friends/${Login}`) Посмотреть список моих друзей
+    br
+    br
+
+    a(href=`/list/${Login}`) Люди
+    br
+    input.text(
+        type='hidden'
+        name='login'
+        value= `${Login}`
+        )
+    br
+    div.block
+        span.innerlabel Имя
+        span.innerinput
+            input.text(
+                type='text'
+                name='name'
+                value= `${Name}`
+                )
+
+    div.block
+        span.innerlabel Отчество
+        span.innerinput
+            input.text(
+                type='text'
+                name='patronymic'
+                value= `${Patronymic}`
+                )
+
+    div.block
+        span.innerlabel Фамилия
+        span.innerinput
+            input.text(
+                type='text'
+                name='lastName'
+                value= `${LastName}`
+                )
+
+    div.block
+        span.innerlabel День рождения
+        span.innerinput
+            input.text(
+                type='text'
+                placeholder='mm/dd/yyyy'
+                name='birth'
+                value= `${Birth}`
+                )
+
+    div.block
+        span.innerlabel Пол
+        span.innerinput
+        input.text(
+            type='text'
+            name='gender'
+            value= `${Gender}`
+            )
+
+    div.block
+        span.innerlabel Город
+        span.innerinput
+            input.text(
+                type='text'
+                name='town'
+                value= `${Town}`
+                )
+
+    div.block
+        span.innerlabel Интересы
+        span.innerinput
+            input.text(
+                type='text'
+                name='hobbies'
+                value= `${Hobbies}`
+                )
+    br
+    br
+
+    button.btn.btn-primary(type='submit') Обновить информацию
+
+

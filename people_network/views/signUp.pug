@@ -1,0 +1,60 @@
+html
+  head
+    title= 'PeopleNetwork'
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css',
+                           integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh',
+                           crossorigin= 'anonymous')
+    style
+      include style.css
+  body
+    h1= 'Регистрация нового пользователя'
+
+br
+br
+br
+br
+br
+br
+br
+br
+p Введите логин и пароль для входа в систему
+
+form(method='POST' action='/createPerson')
+    div.block
+        span.innerlabel Логин
+        span.innerinput
+            input.text-lowercase(
+                type='text'
+                name='login'
+                )
+
+    div.block
+        span.innerlabel Пароль
+        span.innerinput
+            input.text-lowercase(
+                type='password'
+                name='password'
+                )
+
+    div.block
+        span.innerlabel Повторите пароль
+        span.innerinput
+            input.text-lowercase(
+                type='password'
+                name='repeatPassword'
+                )
+
+    div.block
+        span.innerlabel Email
+        span.innerinput
+            input.text-lowercase(
+                type='text'
+                name='email'
+                )
+    br
+    br
+
+    button.btn.btn-primary(type='submit') Создать
+
+    a(href='/') Вернуться на страницу авторизации
+
