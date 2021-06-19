@@ -1,10 +1,11 @@
+/* eslint-disable no-undef */
 const mysql = require("mysql");
 
 const dbConfig = {
-    HOST: ${{ secrets.DB_HOST }},
-    USER: ${{ secrets.DB_USER }},
-    PASSWORD: ${{ secrets.DB_PASSWORD }},
-    DB: ${{ secrets.DB_NAME }},
+    HOST: process.env.DB_HOST,
+    USER: process.env.DB_USER,
+    PASSWORD: process.env.DB_PASSWORD,
+    DB: process.env.DB_NAME,
 };
 
 const connection = mysql.createPool({
