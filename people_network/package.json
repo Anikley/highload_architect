@@ -10,9 +10,9 @@
   "license": "MIT",
   "scripts": {
     "start:watch": "nodemon ./bin/www --ignore public/",
-    "start:dev": "node ./bin/www",
-    "start": "NODE_ENV=production node ./bin/www",
-    "lint": "eslint --fix services/authsevice.js --color",
+    "start": "node ./bin/www",
+    "start:prod": "NODE_ENV=production node ./bin/www",
+    "lint": "eslint --fix services/newsservice.js --color",
     "lint:fix": "npx prettier --write ."
   },
   "engines": {

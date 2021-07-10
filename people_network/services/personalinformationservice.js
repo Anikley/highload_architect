@@ -61,7 +61,7 @@ personalinformationservice.create = (personalInformation, login) => {
   });
 };
 
-personalinformationservice.getByLogin = (login, anotherlogin) => {
+personalinformationservice.getByLogin = (login) => {
   return new Promise(function (resolve, reject) {
     sql.query(
       `SELECT personal_information.*, person.Login FROM person INNER JOIN personal_information ON personal_information.PersonId = person.Id WHERE person.Login='${login}'`,

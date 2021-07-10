@@ -1,0 +1,57 @@
+html
+  head
+    title= 'PeopleNetwork'
+    link(rel='stylesheet', href='https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css',
+                           integrity='sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh',
+                           crossorigin= 'anonymous')
+    style
+      include style.css
+  body
+    h1= 'Лента новостей'
+    a(href='/' ) Назад на мою страницу
+
+  br
+  br
+
+  form(method='POST' action='/createNews')
+    br
+    div.block
+        span.innerlabel Topic
+        span.innerinput
+            input.text(
+                type='text'
+                name='newstopic_tocreate'
+            )
+
+    div.block
+        span.innerlabel Новость
+        span.innerinput
+            input.text(
+                type='text'
+                name='newitem_tocreate'
+                )
+    input.text(
+        type='hidden'
+        name='myLogin'
+        value= `${myLogin}`
+        )
+    button.btn.btn-primary(type='submit') Создать новость
+
+
+  ul
+  each element in newsArray
+    br
+    div
+      div.news_item_header
+        el=`${element.Topic} `
+        span
+            el=element.State === 0 ? ` статус  0 ` : ' статус 1 '
+        span
+            el=` ${element.DateTime}`
+      div.news_item_text
+        el=`${element.Item} `
+    br
+
+
+
+

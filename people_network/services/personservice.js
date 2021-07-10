@@ -1,5 +1,4 @@
 const sql = require("../db");
-//const person = require("./../models/person");
 
 var personservice = {};
 

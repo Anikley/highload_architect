@@ -25,7 +25,7 @@ authservice.verify = (request, response,isAuth) => {
                         .getByLogin(request.params.login, request.params.login)
                         .then((result) => {
                             // eslint-disable-next-line no-console
-                            console.log(result);
+                            //console.log(result);
                             app.userPersonalInformationCallback(result, { request, response });
                         })
                         .catch((error) => {
@@ -46,7 +46,8 @@ authservice.isMyAccount = (req) => {
     return new Promise ((resolve) => {
         jwt.verify(req.cookies.sstoken, "MySuP3R_z3kr3t", (err, decoded) => {
             if (!err && decoded) {
-                if (decoded.data.login == req.params.login) {
+                // eslint-disable-next-line no-console
+                if (decoded.data.login === req.params.login) {
                     resolve({ IsMy: true, Login: decoded.data.login });
                 }
                 resolve({ IsMy: false, Login: decoded.data.login });

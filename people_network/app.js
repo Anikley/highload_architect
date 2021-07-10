@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const express = require("express");
 const app = express();
 const router = express.Router();
@@ -10,6 +11,7 @@ var cookieParser = require("cookie-parser");
 app.set("view engine", "pug");
 app.set("views", __dirname + "/views/");
 app.use(cookieParser("123"));
+
 
 // var options = {
 //   maxAge: '1d',
@@ -26,6 +28,8 @@ const personalInformationService = require(__dirname +
   "/services/personalinformationservice");
 const linkService = require(__dirname + "/services/linkservice");
 const authService = require(__dirname + "/services/authservice");
+const newsService = require(__dirname + "/services/newsservice");
+const settingsService = require(__dirname + "/services/settingsservice");
 
 /**
  * Проверка введенного пароля
@@ -71,16 +75,16 @@ app.post("/createPerson", urlencodedParser, (request, response) => {
     }
 
     //todo
-    //1. проверка почты на соответствие шаблону
-    //2. возврат ошибок на форму
+    // возврат ошибок на форму
 
     const decodepassword = helper.encrypt(request.body.password);
-
+    // eslint-disable-next-line no-useless-escape
+    const expression = (request.body.email).match(/^[\w-\.\d*]+@[\w\d]+(\.\w{2,4})$/);
     personService
         .create({
             Login: request.body.login.replace(/[^a-zA-ZА-Яа-я]/g, ""),
             Password: decodepassword.encryptedData,
-            Email: request.body.email.replace(/[^a-zA-ZА-Яа-я0-9@]/g, ""),
+            Email: expression === null ? "" : request.body.email,
             CreateDate: new Date().getTime(),
             ModifiedDate: new Date().getTime(),
             DeleteDate: null,
@@ -152,17 +156,76 @@ app.get("/", (request, response) => {
         true,
     );
 
+
     response.render("login", { err: "" });
+});
+
+/**
+ * Вернуть страницу с новостями пользователя по логину
+ */
+app.get("/account/:login/news", async (request, response) => {
+
+    let result_news = [];
+
+    const login = request.params.login;
+
+    const settings = await settingsService.getAll(); //.then( x=> x.NewsStdTtl);
+    newsService.reconfugureCash(settings);
+
+    let cachedfriends = await newsService.getCachedFriendsByPersonLogin(login);
+
+    if (cachedfriends === undefined) {
+        const friendsUpdated = await linkService.getAllFriends(login);
+        newsService.setCachedFriendsByPersonLogin(login, friendsUpdated);
+        cachedfriends = friendsUpdated;
+    }
+
+    // проверяем ленту для пользователя в кеше
+    const cachedlentaNews = newsService.getCachedNews();
+
+    if (cachedlentaNews === undefined) {
+
+        //выбрать все новости из очереди для друзей
+        const generator = newsService.getAll();
+        generator.next(); // запускаем чтение из очереди
+
+        // eslint-disable-next-line no-undef
+        setTimeout(() => {
+            // записать новости в кеш
+            const newsQueue = newsService.getCachedNews();
+
+            result_news = [].concat(result_news, newsQueue.ms);
+
+            response.render("newsItem", { newsArray: result_news.filter(x => (cachedfriends.map(x => x.ID.toString())).includes(x.PersonId)), myLogin: login });
+        }, 2000);
+    }
+    else {
+        // берем новости из кеша
+        result_news = [].concat(result_news, cachedlentaNews.ms);
+
+        response.render("newsItem", { newsArray: result_news.filter(x => (cachedfriends.map(x => x.ID.toString())).includes(x.PersonId)), myLogin: login });
+    }
+});
+
+// создание новости
+// eslint-disable-next-line no-unused-vars
+app.post("/createNews", urlencodedParser, async (request, response, next) => {
+    // кто, topic, содержимое
+    // дата статус refid=0 если нет ссылок на другие посты(потом)
+    var news = request.body;
+    await newsService.create({ topic: news.newstopic_tocreate, newsitem: news.newitem_tocreate, login: news.myLogin });
+    // берем новости из кеша
+    let cachedfriends = await newsService.getCachedFriendsByPersonLogin(news.myLogin);
+    const result_news = [].concat([], newsService.getCachedNews().ms);
+    response.render("newsItem", { newsArray: result_news.filter(x => (cachedfriends.map(x => x.ID.toString())).includes(x.PersonId)), myLogin: news.myLogin });
 });
 
 app.get("/account/:login", (request, response) => {
     authService.isMyAccount(request).then((result) => {
         if (result.IsMy) {
             personalInformationService
-                .getByLogin(request.params.login, request.params.login)
+                .getByLogin(request.params.login)
                 .then((result) => {
-                    // eslint-disable-next-line no-console
-                    console.log(result);
                     userPersonalInformationCallback(result, { request, response });
                 })
                 .catch((error) => {
@@ -171,13 +234,14 @@ app.get("/account/:login", (request, response) => {
                     response.sendStatus(500);
                 });
         } else {
+            const anotherlogin = result.Login;
             personalInformationService
                 .getByLogin(request.params.login, result.Login)
                 .then((result) => {
                     anotherPersonalInformationCallback(
                         result,
                         { request, response },
-                        { login: request.params.login, anotherlogin: result.Login }
+                        { login: request.params.login, anotherlogin: anotherlogin }
                     );
                 })
                 .catch((error) => {
@@ -225,7 +289,7 @@ app.post("/personUpdate", urlencodedParser, (request, response) => {
     let pInfo = request.body;
 
     const gender =
-    pInfo.gender === "Женский" ? 1 : pInfo.gender === "Мужской" ? 0 : null;
+    pInfo.gender === "женский" ? 1 : pInfo.gender === "мужской" ? 0 : null;
     const birthdate = moment(pInfo.birth).format();
 
     personalInformationService
@@ -266,9 +330,9 @@ const anotherPersonalInformationCallback = (
         linkService.isFriend(login, anotherlogin).then((result) => {
             const gender =
         json[0].Gender === 0
-            ? "Мужской"
+            ? "мужской"
             : json[0].Gender === 1
-                ? "Женский"
+                ? "женский"
                 : "";
             sender.response.render("another_account", {
                 Login: json[0].Login,
