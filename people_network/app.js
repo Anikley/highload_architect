@@ -62,6 +62,28 @@ app.post("/register", urlencodedParser, (request, response) => {
     });
 });
 
+app.get("/test_tarantool_1",(request, response) => {
+    personService.getRepeatedDataFromMySql().then((result) => {
+        // eslint-disable-next-line no-console
+        console.log(`Тестирование совпадений: ${result} (раз)`);
+
+        response.statusCode = 200;
+        response.setHeader("Content-Type", "text/plain");
+        response.end(`Count reps: ${result}' (раз)`);
+    });
+});
+
+app.get("/test_tarantool_2",(request, response) => {
+    personService.getRepeatedDataFromTarantool().then((result) => {
+        // eslint-disable-next-line no-console
+        console.log(`Тестирование совпадений: ${result} (times)`);
+
+        response.statusCode = 200;
+        response.setHeader("Content-Type", "text/plain");
+        response.end(`Count reps: ${result}' (times)`);
+    });
+});
+
 app.post("/createPerson", urlencodedParser, (request, response) => {
     if (!request.body) return response.sendStatus(400);
 

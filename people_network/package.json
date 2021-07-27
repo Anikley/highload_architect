@@ -10,8 +10,8 @@
   "license": "MIT",
   "scripts": {
     "start:watch": "nodemon ./bin/www --ignore public/",
-    "start:dev": "node ./bin/www",
-    "start": "NODE_ENV=production node ./bin/www",
+    "start": "node ./bin/www",
+    "start:prod": "NODE_ENV=production node ./bin/www",
     "lint": "eslint --fix services/authsevice.js --color",
     "lint:fix": "npx prettier --write ."
   },
@@ -25,10 +25,12 @@
     "cookie-parser": "~1.4.3",
     "crypto": "^1.0.1",
     "dotenv": "^5.0.0",
+    "event-lite": "^0.1.2",
     "execa": "^0.9.0",
     "express": "^4.16.2",
     "express-jwt": "^5.3.3",
     "helmet": "^3.11.0",
+    "int64-buffer": "^1.0.1",
     "jquery": "^1.9.1",
     "jsonwebtoken": "^8.5.1",
     "kafka-node": "^5.0.0",
@@ -43,6 +45,7 @@
     "pug": "^2.0.4",
     "readable-stream": "^2.3.7",
     "string_decoder": "^1.1.1",
+    "tarantool-driver": "^3.0.6",
     "typescript": "^4.3.2"
   },
   "devDependencies": {
