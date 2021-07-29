@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-console */
 const express = require("express");
 const app = express();
@@ -13,11 +14,6 @@ app.set("views", __dirname + "/views/");
 app.use(cookieParser("123"));
 
 
-// var options = {
-//   maxAge: '1d',
-//   redirect: false
-// }
-
 const bodyParser = require("body-parser");
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 app.use(express.static(__dirname + "/public"));
@@ -29,7 +25,7 @@ const personalInformationService = require(__dirname +
 const linkService = require(__dirname + "/services/linkservice");
 const authService = require(__dirname + "/services/authservice");
 const newsService = require(__dirname + "/services/newsservice");
-const settingsService = require(__dirname + "/services/settingsservice");
+//const settingsService = require(__dirname + "/services/settingsservice");
 
 /**
  * Проверка введенного пароля
@@ -156,7 +152,6 @@ app.get("/", (request, response) => {
         true,
     );
 
-
     response.render("login", { err: "" });
 });
 
@@ -164,60 +159,20 @@ app.get("/", (request, response) => {
  * Вернуть страницу с новостями пользователя по логину
  */
 app.get("/account/:login/news", async (request, response) => {
-
-    let result_news = [];
-
     const login = request.params.login;
 
-    const settings = await settingsService.getAll(); //.then( x=> x.NewsStdTtl);
-    newsService.reconfugureCash(settings);
-
-    let cachedfriends = await newsService.getCachedFriendsByPersonLogin(login);
-
-    if (cachedfriends === undefined) {
-        const friendsUpdated = await linkService.getAllFriends(login);
-        newsService.setCachedFriendsByPersonLogin(login, friendsUpdated);
-        cachedfriends = friendsUpdated;
-    }
-
-    // проверяем ленту для пользователя в кеше
-    const cachedlentaNews = newsService.getCachedNews();
-
-    if (cachedlentaNews === undefined) {
-
-        //выбрать все новости из очереди для друзей
-        const generator = newsService.getAll();
-        generator.next(); // запускаем чтение из очереди
-
-        // eslint-disable-next-line no-undef
-        setTimeout(() => {
-            // записать новости в кеш
-            const newsQueue = newsService.getCachedNews();
-
-            result_news = [].concat(result_news, newsQueue.ms);
-
-            response.render("newsItem", { newsArray: result_news.filter(x => (cachedfriends.map(x => x.ID.toString())).includes(x.PersonId)), myLogin: login });
-        }, 2000);
-    }
-    else {
-        // берем новости из кеша
-        result_news = [].concat(result_news, cachedlentaNews.ms);
-
-        response.render("newsItem", { newsArray: result_news.filter(x => (cachedfriends.map(x => x.ID.toString())).includes(x.PersonId)), myLogin: login });
-    }
+    response.render("newsItem", { newsArray: [], myLogin: login });
 });
 
 // создание новости
 // eslint-disable-next-line no-unused-vars
 app.post("/createNews", urlencodedParser, async (request, response, next) => {
-    // кто, topic, содержимое
     // дата статус refid=0 если нет ссылок на другие посты(потом)
     var news = request.body;
     await newsService.create({ topic: news.newstopic_tocreate, newsitem: news.newitem_tocreate, login: news.myLogin });
-    // берем новости из кеша
-    let cachedfriends = await newsService.getCachedFriendsByPersonLogin(news.myLogin);
-    const result_news = [].concat([], newsService.getCachedNews().ms);
-    response.render("newsItem", { newsArray: result_news.filter(x => (cachedfriends.map(x => x.ID.toString())).includes(x.PersonId)), myLogin: news.myLogin });
+    response.redirect(
+        "http://" + request.headers.host + "/account/" + news.myLogin + "/news?"
+    );
 });
 
 app.get("/account/:login", (request, response) => {

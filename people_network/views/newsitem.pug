@@ -6,6 +6,9 @@ html
                            crossorigin= 'anonymous')
     style
       include style.css
+    script(src='https://code.jquery.com/jquery-3.4.1.slim.min.js')
+    script(src='https://getbootstrap.com/docs/4.4/dist/js/bootstrap.bundle.min.js')
+    script(src='../../wsclient.js')
   body
     h1= 'Лента новостей'
     a(href='/' ) Назад на мою страницу
@@ -38,20 +41,8 @@ html
     button.btn.btn-primary(type='submit') Создать новость
 
 
-  ul
-  each element in newsArray
-    br
-    div
-      div.news_item_header
-        el=`${element.Topic} `
-        span
-            el=element.State === 0 ? ` статус  0 ` : ' статус 1 '
-        span
-            el=` ${element.DateTime}`
-      div.news_item_text
-        el=`${element.Item} `
-    br
+  div.placeNews
 
-
+script!= "var items = (function() { return JSON.parse(JSON.parse(localStorage.getItem('lenta'))); })(); var stringHtml = ''; for (var i = 0; i < items.length; i++) { stringHtml +='<br>' + (i+1)+ '. Тема:  ' +  items[i].Topic + ' Сообщение: ' + items[i].Item; }; document.getElementsByClassName('placeNews')[0].innerHTML = stringHtml;"
 
 
