@@ -3,32 +3,27 @@
 /* eslint-disable no-undef */
 var WebSocketServer = require("websocket").server;
 var http = require("http");
-const NodeCache = require( "node-cache" );
-const kafka = require("kafka-node");
+const dialogservice = require("../services/dialogService");
 
 const sql = require("../db");
-
-//кеш
-let cache_news = new NodeCache({ stdTTL: 100000, checkperiod:600 });
-
-const KafkaClient = new kafka.KafkaClient("localhost:2181", "localhost:9092" );
 
 var server = http.createServer(function(request, response) {
     console.log((new Date()) + " Received request for " + request.url);
     response.writeHead(404);
     response.end();
 });
+
 server.listen(5000, function() {
     console.log((new Date()) + " Server is listening on port 5000");
 });
 
 wsServer = new WebSocketServer({
     httpServer: server,
-
     autoAcceptConnections: false
 });
 
 function originIsAllowed(origin) {
+    console.log(origin);
     return true;
 }
 
@@ -38,49 +33,14 @@ function originIsAllowed(origin) {
  * consumerGroup - чьи топики читаем
  * каждый топик отвечает за автора обновлений
  */
-function getAll() {
+getAll = async(friends) => {
     try {
-        const options = {
-            autoCommit: false,
-        };
-
-        // чтение всех сообщений разом и фильтрация только в момент создания ленты
-        const consumer =  new kafka.Consumer(KafkaClient, [{ topic: "messages", partition: 0 }], options);
-        getCachedNews();
-        consumer.on("message", (data) => {
-
-            const oldNews = cache_news.take("messages");
-            const updatedNews = [].concat([JSON.parse(data.value)], oldNews.ms);
-            cache_news.set("messages", { ms: updatedNews });
-        });
-
-        return;
+        return await dialogservice.getAll(friends);
     }
     catch (err ) {
         console.log("error: ", err);
     }
-}
-
-// получить из кеша ленту обновлений
-function getCachedNews () {
-    if (cache_news.has("messages")) {
-        return cache_news.get("messages");
-    }
-    else {
-        cache_news.set("messages", { ms: []});
-        return undefined;
-    }
-}
-
-function getMessageCount() {
-    if (cache_news.has("messagesCount")) {
-        return cache_news.get("messagesCount");
-    }
-    else {
-        cache_news.set("messagesCount", -1);
-        return cache_news.get("messagesCount");
-    }
-}
+};
 
 function getAllFriends (mylogin) {
     return new Promise((resolve, reject) => {
@@ -105,27 +65,19 @@ wsServer.on("request", async (request) => {
         return;
     }
     var cachedfriends = await getAllFriends(request.resourceURL.pathname.substring(1, request.resourceURL.pathname.length));
-    getAll();
+
 
     var connection = request.accept("echo-protocol", request.origin);
 
-    connection.on("message", async (message) => {
+    connection.on("message", async () => {
         setInterval(() => {
-            const cachedlentaNews = getCachedNews();
-
-            if (cachedlentaNews !== undefined)
-            {
-                if (cachedlentaNews.ms.length === getMessageCount()) return;
-
-                const ar = ((cachedlentaNews.ms).filter(x => (cachedfriends.map(x => x.ID.toString())).includes(x.PersonId)));
-                cache_news.set("messagesCount", cachedlentaNews.ms.length);
-
-                connection.sendUTF(JSON.stringify(ar));
-            }
-        }, 2000);
+            getAll(cachedfriends.map(x => x.ID.toString()).join()).then ((data) => {
+                connection.sendUTF((data.data.value));
+            });
+        }, 5000);
     });
 
-    connection.on("close", function(reasonCode, description) {
+    connection.on("close", function() {
         console.log((new Date()) + " Peer " + connection.remoteAddress + " disconnected.");
     });
 });

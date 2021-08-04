@@ -161,6 +161,7 @@ app.get("/", (request, response) => {
 app.get("/account/:login/news", async (request, response) => {
     const login = request.params.login;
 
+    //const lenta = await dialogService.getAll();
     response.render("newsItem", { newsArray: [], myLogin: login });
 });
 

@@ -15,11 +15,11 @@ socket.onopen = function(e) {
 };
 
 socket.onmessage = function(event) {
-    localStorage.setItem("lenta", JSON.stringify(event.data));
+    localStorage.setItem("lenta", event.data);
     // обработка варианта изменения данных
     // релоад если есть изменения для текущего логина
     if (event.data.length !== parseInt(localStorage.getItem("reloadSign"))) {
-        console.log(event);
+
         localStorage.setItem("reloadSign", event.data.length.toString());
 
         window.location.reload();
