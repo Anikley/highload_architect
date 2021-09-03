@@ -3,3 +3,7 @@
 ################################################################################
 
 /people_network/.vs
+/.vs
+/loadbalancer/master/data
+/loadbalancer/slave/data1
+/loadbalancer/slave/data2

@@ -1,4 +1,5 @@
-const sql = require("../db");
+const sql_read = require("../db_read");
+const sql_write = require("../db_write");
 //const person = require("./../models/person");
 
 var personservice = {};
@@ -8,7 +9,7 @@ var personservice = {};
  */
 personservice.create = (newPerson) => {
   return new Promise(function (resolve, reject) {
-    sql.query("INSERT INTO person SET ?", newPerson, (err, res) => {
+    sql_write.query("INSERT INTO person SET ?", newPerson, (err, res) => {
       if (err) {
         console.log("error: ", err);
         reject(err);
@@ -24,7 +25,7 @@ personservice.create = (newPerson) => {
  */
 personservice.getAll = (mylogin) => {
   return new Promise(function (resolve, reject) {
-    sql.query(
+    sql_read.query(
       `SELECT * FROM person WHERE Login <> '${mylogin}' LIMIT 10000`,
       (err, result) => {
         if (err) {
@@ -42,7 +43,7 @@ personservice.getAll = (mylogin) => {
  */
 personservice.verify = (login) => {
   return new Promise(function (resolve, reject) {
-    sql.query(
+    sql_read.query(
       "SELECT * FROM person WHERE login = ?",
       [login],
       (err, result) => {
@@ -58,7 +59,7 @@ personservice.verify = (login) => {
 
 personservice.getByLogin = (login) => {
   return new Promise(function (resolve, reject) {
-    sql.query(
+    sql_read.query(
       `SELECT Id FROM person WHERE person.Login = '${login}'`,
       (err, result) => {
         if (err) {

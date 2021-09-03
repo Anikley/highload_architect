@@ -13,12 +13,11 @@ authservice.generateToken = (person) => {
     return jwt.sign({ data }, signature, { expiresIn: expiration });
 };
 
-authservice.verify = (request, response,isAuth) => {
+authservice.verify = (request, response, isAuth) => {
     jwt.verify(request.cookies.sstoken, "MySuP3R_z3kr3t", (err, decoded) => {
         if (err) {
             return null;
         } else if (decoded && isAuth) {
-
             authservice.isMyAccount(request).then((result) => {
                 if (result.IsMy) {
                     personalInformationService
@@ -26,7 +25,10 @@ authservice.verify = (request, response,isAuth) => {
                         .then((result) => {
                             // eslint-disable-next-line no-console
                             console.log(result);
-                            app.userPersonalInformationCallback(result, { request, response });
+                            app.userPersonalInformationCallback(result, {
+                                request,
+                                response,
+                            });
                         })
                         .catch((error) => {
                             // eslint-disable-next-line no-console
@@ -35,7 +37,6 @@ authservice.verify = (request, response,isAuth) => {
                         });
                 }
             });
-
         } else if (decoded && !isAuth) {
             return;
         }
@@ -43,7 +44,7 @@ authservice.verify = (request, response,isAuth) => {
 };
 
 authservice.isMyAccount = (req) => {
-    return new Promise ((resolve) => {
+    return new Promise((resolve) => {
         jwt.verify(req.cookies.sstoken, "MySuP3R_z3kr3t", (err, decoded) => {
             if (!err && decoded) {
                 if (decoded.data.login == req.params.login) {

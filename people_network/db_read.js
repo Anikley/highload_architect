@@ -1,10 +1,11 @@
 const mysql = require("mysql");
 
 const dbConfig = {
-    HOST: "us-cdbr-east-04.cleardb.com", //process.env.DB_HOST,
-    USER: "b920a6ea8abe3c", //process.env.DB_USER,
-    PASSWORD: "4830f1fc", //process.env.DB_PASSWORD,
-    DB: "heroku_f4fda1262322f10", //process.env.DB_NAME,
+    HOST: "localhost",
+    USER: "root",
+    PASSWORD: "111",
+    DB: "mydb",
+    PORT: "3306"
 };
 
 const connection = mysql.createPool({
@@ -12,6 +13,7 @@ const connection = mysql.createPool({
     user: dbConfig.USER,
     password: dbConfig.PASSWORD,
     database: dbConfig.DB,
+    port: dbConfig.PORT,
 });
 
 // eslint-disable-next-line no-undef

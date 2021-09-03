@@ -1,4 +1,5 @@
-const sql = require("../db");
+const sql_read = require("../db_read");
+const sql_write = require("../db_write");
 //const personInformation = require("./../models/personInformation");
 
 var personalinformationservice = {};
@@ -8,7 +9,7 @@ var personalinformationservice = {};
  */
 personalinformationservice.create = (personalInformation, login) => {
   return new Promise(function (resolve) {
-    sql.query(
+    sql_read.query(
       `SELECT person.Id, personal_information.PersonId FROM person LEFT JOIN personal_information ON person.Id = personal_information.PersonId WHERE person.Login='${login}'`,
       (err, res) => {
         if (err) {
@@ -19,7 +20,7 @@ personalinformationservice.create = (personalInformation, login) => {
         if (json.length >= 1 && json[0].PersonId == null) {
           personalInformation.PersonId = json[0].Id;
 
-          sql.query(
+          sql_read.query(
             "INSERT INTO personal_information SET ?",
             personalInformation,
             (err, res) => {
@@ -34,7 +35,7 @@ personalinformationservice.create = (personalInformation, login) => {
         } else {
           var personId = JSON.parse(JSON.stringify(res))[0].PersonId;
 
-          sql.query(
+          sql_write.query(
             "UPDATE personal_information SET Name = ?, LastName = ?, Patronymic = ?, Gender = ?, Town = ?, Hobbies = ?, Birth = ?  WHERE PersonId = ?",
             [
               personalInformation.Name,
@@ -63,7 +64,7 @@ personalinformationservice.create = (personalInformation, login) => {
 
 personalinformationservice.getByLogin = (login, anotherlogin) => {
   return new Promise(function (resolve, reject) {
-    sql.query(
+    sql_read.query(
       `SELECT personal_information.*, person.Login FROM person INNER JOIN personal_information ON personal_information.PersonId = person.Id WHERE person.Login='${login}'`,
       (err, res) => {
         if (err) {
@@ -77,7 +78,7 @@ personalinformationservice.getByLogin = (login, anotherlogin) => {
 
 personalinformationservice.filterByParams = (searchParams) => {
   return new Promise(function (resolve, reject) {
-    sql.query(
+    sql_read.query(
       `SELECT person.Login, Name, LastName, PersonId FROM personal_information FORCE INDEX(IDX_personal_information) JOIN person ON person.Id = PersonId WHERE Name LIKE '${searchParams.name}%' AND LastName LIKE '${searchParams.sirname}%' ORDER BY PersonId ASC`,
       (err, result) => {
         if (err) {

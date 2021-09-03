@@ -1,4 +1,5 @@
-const sql = require("../db");
+const sql_read= require("../db_read");
+const sql_write= require("../db_write");
 //const links = require("./../models/links");
 const personService = require(__dirname + "/personservice");
 
@@ -7,7 +8,7 @@ var linkservice = {};
 // Проверка связи
 linkservice.isFriend = (myLogin, anotherPersonLogin) => {
     return new Promise((resolve) => {
-        sql.query(
+        sql_read.query(
             `SELECT * FROM links WHERE links.Person1_ID in(SELECT Id FROM person WHERE person.Login ='${myLogin}' OR person.Login ='${anotherPersonLogin}')  AND links.Person2_ID in (SELECT Id FROM person WHERE person.Login ='${myLogin}' OR person.Login ='${anotherPersonLogin}')`,
             (err, result) => {
                 if (err) {
@@ -32,7 +33,7 @@ linkservice.create = (linkInfo) => {
     return new Promise((resolve) => {
         personService.getByLogin(linkInfo.login1).then((Person1) => {
             personService.getByLogin(linkInfo.login2).then((Person2) => {
-                sql.query(
+                sql_write.query(
                     "INSERT INTO links SET Person1_ID = ?, Person2_ID = ?, State = ?, CreateDate = ?, ModifiedDate = ? ",
                     [Person1.Id, Person2.Id, 1, Date.now(), Date.now()],
                     (err) => {
@@ -56,7 +57,7 @@ linkservice.update = (linkInfo) => {
     return new Promise((resolve) => {
         personService.getByLogin(linkInfo.login1).then((Person1) => {
             personService.getByLogin(linkInfo.login2).then((Person2) => {
-                sql.query(
+                sql_write.query(
                     `UPDATE links SET Person1_ID = ${Person1.Id}, Person2_ID = ${
                         Person2.Id
                     }, State = ${
@@ -82,7 +83,7 @@ linkservice.update = (linkInfo) => {
 //Вернуть всех друзей и подписчиков, у которых с моей страницей есть связи или были связи(раздружба)
 linkservice.getAllFriends = (mylogin) => {
     return new Promise((resolve, reject) => {
-        sql.query(
+        sql_read.query(
             `SELECT * FROM person JOIN  (SELECT links.Person1_ID, links.Person2_ID FROM links WHERE ( links.Person1_ID in (SELECT Id FROM person WHERE person.Login = '${mylogin}') OR links.Person2_ID in ((SELECT Id FROM person WHERE person.Login = '${mylogin}')))) as res WHERE (res.Person1_ID = person.Id OR res.Person2_ID = person.Id) AND person.Login <> '${mylogin}'`,
             (err, result) => {
                 if (err) {

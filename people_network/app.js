@@ -146,11 +146,7 @@ app.get("/find", (request, response) => {
 });
 
 app.get("/", (request, response) => {
-    authService.verify(
-        request,
-        response,
-        true,
-    );
+    authService.verify(request, response, true);
 
     response.render("login", { err: "" });
 });
@@ -198,6 +194,16 @@ app.get("/list/:account", (request, response) => {
     );
     personService.getAll(request.params.account).then((result) => {
         response.render("list", {
+            listOfPersons: JSON.parse(JSON.stringify(result)),
+            url: "./account",
+        });
+    });
+});
+
+// test задание на баланстровку нагрузки
+app.get("/friends/flaviy_brazgovka", (request, response) => {
+    linkService.getAllFriends("flaviy_brazgovka").then((result) => {
+        response.render("friends", {
             listOfPersons: JSON.parse(JSON.stringify(result)),
             url: "./account",
         });
