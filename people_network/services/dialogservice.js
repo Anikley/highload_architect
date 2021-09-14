@@ -4,8 +4,9 @@ const axios = require("axios");
 var dialogservice = {};
 
 dialogservice.getAll = (friends) =>  {
+    console.log(friends);
     try {
-        return axios.post("http://localhost:8080/v1/getAll",
+        return axios.post("http://localhost:9010/v1/getAll",
             {
                 data: friends
             });
@@ -16,7 +17,7 @@ dialogservice.getAll = (friends) =>  {
 
 dialogservice.create = (message) =>  {
     try {
-        return axios.post("http://localhost:8080/v1/create",
+        return axios.post("http://localhost:9010/v1/create",
             {
                 data: message
             });

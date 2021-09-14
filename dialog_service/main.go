@@ -14,12 +14,16 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/segmentio/kafka-go"
+	"time"
+    "github.com/prometheus/client_golang/prometheus"
+    "github.com/prometheus/client_golang/prometheus/promauto"
+    "github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // the topic and broker address are initialized as constants
 const (
 	topic          = "messages"
-	broker1Address = "localhost:29092"
+	broker1Address = "172.18.0.5:29092"
 )
 
 const (  
@@ -29,14 +33,38 @@ const (
     dbname   = "heroku_f4fda1262322f10"
 )
 
+func recordMetrics() {
+        go func() {
+                for {
+                        opsProcessed.Inc()
+                        time.Sleep(2 * time.Second)
+                }
+        }()
+}
+
+var (
+        opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+                Name: "myapp_processed_ops_total",
+                Help: "The total number of processed events",
+        })
+)
+
 
 func main() {
   r := gin.Default()
+   
+  recordMetrics()
   // mysql connection
   connectionString := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8", username, password, hostname, dbname)
   // listen kafka
   ctx := context.Background()
   go consume(ctx, connectionString)
+
+  r.GET("/metrics", func (c *gin.Context) {
+	  h := promhttp.Handler()
+	  log.Println("gettings metrics")
+	  h.ServeHTTP(c.Writer, c.Request)
+  })
 
   r.POST("/v1/getAll", func(c *gin.Context) {
 	body := c.Request.Body

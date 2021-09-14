@@ -4,3 +4,12 @@
 
 /people_network/.vs
 /.vs
+/dialog_service/src/mysql/mysql
+/dialog_service/src/mysql/performance_schema
+/dialog_service/src/mysql/sys
+/dialog_service/src/mysql/zabbix
+/dialog_service/src/mysql
+/loadbalancer/master/data
+/loadbalancer/slave/data1
+/loadbalancer/slave/data2/mydb
+/loadbalancer/slave/data2/mysql
