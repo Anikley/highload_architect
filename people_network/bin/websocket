@@ -34,12 +34,7 @@ function originIsAllowed(origin) {
  * каждый топик отвечает за автора обновлений
  */
 getAll = async(friends) => {
-    try {
-        return await dialogservice.getAll(friends);
-    }
-    catch (err ) {
-        console.log("error: ", err);
-    }
+    return await dialogservice.getAll(friends);
 };
 
 function getAllFriends (mylogin) {
@@ -65,7 +60,6 @@ wsServer.on("request", async (request) => {
         return;
     }
     var cachedfriends = await getAllFriends(request.resourceURL.pathname.substring(1, request.resourceURL.pathname.length));
-
 
     var connection = request.accept("echo-protocol", request.origin);
 

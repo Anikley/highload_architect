@@ -96,5 +96,23 @@ linkservice.getAllFriends = (mylogin) => {
     });
 };
 
+//Вернуть всех друзей и подписчиков, у которых с моей страницей есть связи или были связи(раздружба)
+linkservice.getAllPerson = () => {
+    return new Promise((resolve, reject) => {
+        sql.query(
+            "SELECT ID, Login FROM person",
+            (err, result) => {
+                if (err) {
+                    // eslint-disable-next-line no-console
+                    console.log("error: ", err);
+                    reject(err);
+                }
+                if (!err) resolve(JSON.parse(JSON.stringify(result)));
+            }
+        );
+    });
+};
+
+
 // eslint-disable-next-line no-undef
 module.exports = linkservice;

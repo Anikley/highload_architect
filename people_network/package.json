@@ -11,6 +11,7 @@
   "scripts": {
     "start:watch": "nodemon ./bin/www --ignore public/",
     "start": "node ./bin/www",
+    "start:s1": "node ./bin/unreadmsgservice",
     "start:prod": "NODE_ENV=production node ./bin/www",
     "lint": "eslint --fix services/newsservice.js --color",
     "lint:fix": "npx prettier --write .",
@@ -43,6 +44,7 @@
     "node-cache": "^5.1.2",
     "popper.js": "^1.16.0",
     "pug": "^2.0.4",
+    "qs": "^6.10.1",
     "readable-stream": "^2.3.7",
     "string_decoder": "^1.1.1",
     "typescript": "^4.3.2",

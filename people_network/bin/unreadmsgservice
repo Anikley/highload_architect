@@ -5,19 +5,19 @@
 /**
  * Module dependencies
  */
-const app = require("../app");
+const service1 = require("../service1");
 const http = require("http");
 
 /**
  * Get port from environment and store in Express
  */
-const port = normalizePort(process.env.PORT || "3000");
-app.set("port", port);
+const port = normalizePort(process.env.PORT || "9020");
+service1.set("port", port);
 
 /**
  * Create HTTP server
  */
-const server = http.createServer(app);
+const server = http.createServer(service1);
 
 /**
  * Listen on provided port, on all network interfaces
@@ -79,5 +79,3 @@ function onListening () {
     const uri = typeof addr === "string" ? addr : `http://localhost:${addr.port}`;
     console.log(`Listening on ${uri}`);
 }
-
-
