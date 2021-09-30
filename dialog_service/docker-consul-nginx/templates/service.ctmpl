@@ -1,0 +1,14 @@
+upstream nginx-backend {
+{{- range service "dialog-services-01-8080" }}
+  server {{ .Address }}:8080;
+{{- end}}
+}
+
+server {
+  listen 8080;
+  server_name localhost;
+
+    location / {
+        proxy_pass http://nginx-backend;
+    }
+}

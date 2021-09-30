@@ -1,166 +1,85 @@
 version: '3.8'
-volumes:
-  grafana_data: {}
+# volumes:
+  # grafana_data: {}
   
 services:
-  mysql-server:
-    image: mysql:5.7
-    container_name: zabbix_mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root_pwd
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix
-    ports:
-      - '3306:3306'
-    restart: always
-    volumes:
-      - ./src/mysql:/var/lib/mysql
-    networks:
-      - otus
-    command: ['mysqld', '--character-set-server=utf8', '--collation-server=utf8_bin']
+    dialog-service:
+        image: dialog-services-01
+        # build:
+          # dockerfile: ./Dockerfile
+          # context: .
+        restart: unless-stopped
+        #command: "consul services register -name dialog-services-01 -http-addr 172.18.0.6:8500"
+        ports:
+          - "9011-9015:8080"
+        networks:
+          - otus
+
+    consul-server:
+      image: consul:latest
+      container_name: consul-server
+      hostname: consul-server
+      command: "agent -server -retry-join consul-bootstrap -client 0.0.0.0"
+      networks:
+        - otus
     
-  zabbix-server:
-    image: zabbix/zabbix-server-mysql:alpine-latest
-    container_name: zabbix_server
-    environment:
-      DB_SERVER_HOST: mysql-server
-      MYSQL_DATABASE: zabbix
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix
-    ports:
-       - '10051:10051'
-    restart: always
-    links: 
-      - mysql-server
-    depends_on:
-      - mysql-server
-    networks:
-      - otus
+    consul-bootstrap:
+      image: consul:latest
+      container_name: consul-bootstrap
+      command: agent -server -bootstrap-expect 1 -ui -client 0.0.0.0
+      ports:
+        - "8300:8300"
+        - "8400:8400"
+        - "8500:8500"
+        - "8600:8600"
+        - "8600:8600/udp"      
+      restart: on-failure:10
+      networks:
+        - otus
+  
+  # todo edit settings /bin/registrator 
+  # -cleanup=false: Remove dangling services
+  # -deregister="always": Deregister exited services "always" or "on-success"
+  # -internal=false: Use internal ports instead of published ones
+  # -ip="": IP for ports mapped to the host
+  # -resync=0: Frequency with which services are resynchronized
+  # -retry-attempts=0: Max retry attempts to establish a connection with the backend. Use -1 for infinite retries
+  # -retry-interval=2000: Interval (in millisecond) between retry-attempts.
+  # -tags="": Append tags for all registered services
+  # -ttl=0: TTL for services (default is no expiry)
+  # -ttl-refresh=0: Frequency with which service TTLs are refreshed
+  
+    registrator:
+      image: gliderlabs/registrator:latest
+      container_name: registrator
+      environment: 
+          CONSUL_BIND_INTERFACE: eth0
+          CONSUL_HOST: consul-bootstrap
+      depends_on:
+        - consul-bootstrap
+      network_mode: host 
+      volumes:
+        - /var/run/docker.sock:/tmp/docker.sock
+      command: "consul://172.18.0.4:8500"
 
-  zabbix-web:
-    image: zabbix/zabbix-web-nginx-mysql:alpine-latest
-    container_name: zabbix-web
-    environment:
-      MYSQL_ROOT_PASSWORD: root_pwd
-      MYSQL_USER: zabbix
-      MYSQL_PASSWORD: zabbix
-      ZBX_SERVER_HOST: zabbix-server
-      PHP_TZ: Europe/Moscow
-    ports:
-      - '443:443'
-      - '4545:8080'
-    restart: always
-    links: 
-      - zabbix-server
-    depends_on:
-      - zabbix-server
-    networks:
-      - otus
-
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus
-    networks:
-      - otus
-    ports:
-      - 9090:9090
-    expose: [ "9090" ]
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    command: 
-      - --config.file=/etc/prometheus/prometheus.yml
-    labels:
-        org.label-schema.group: "monitoring"
-    depends_on:
-    - cadvisor  
-      
-  grafana:
-    image: grafana/grafana:7.3.6
-    container_name: grafana
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-    environment:
-      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    restart: unless-stopped
-    networks:
-      - otus
-    depends_on:
-    - prometheus
-    ports:
-      - '3001:3000'
-    labels:
-      org.label-schema.group: "monitoring"
-      
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    networks:
-      - otus
-    ports:
-    - 8080:8080
-    volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro   
-    - /dev/disk/:/dev/disk:ro
-      
-  zookeeper:
-    networks:
-      - otus
-    hostname: zookeeper
-    image: wurstmeister/zookeeper
-    container_name: zookeeper
-    restart: always
-    ports:
-      - "2181:2181"
-
-  kafka:
-    networks:
-      - otus
-    image: confluentinc/cp-enterprise-kafka:latest
-    container_name: kafka
-    restart: always
-    ports:
-      - "9092:9092"
-      - "29092:29092"
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      ALLOW_PLAINTEXT_LISTENER: "true"
-      KAFKA_LOG_RETENTION_MS: 8640000000
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
-      
-  dialog-service:
-    build:
-      dockerfile: Dockerfile 
-      context: .
-    restart: unless-stopped
-    container_name: dialog-service
-    hostname: dialog-service
-    privileged: false
-    depends_on:
-      - zookeeper
-      - kafka
-    ports:
-      - 9010:8080
-      - 10050:10050
-    networks:
-      - otus
-      
+    nginx-consul:
+        container_name: nginx-consul
+        build:
+          dockerfile: ./docker-consul-nginx/Dockerfile 
+          context: .
+        volumes:
+         - ./docker-consul-nginx/templates/service.ctmpl:/etc/nginx/templates/service.ctmpl
+         - ./docker-consul-nginx/start.sh:/etc/nginx/start.sh
+        depends_on:
+         - registrator
+        command: "sh start.sh"
+        ports:
+         - 8080:8080
+        links:
+         - registrator
+        networks:
+         - otus      
+                 
 networks:
   otus:
     driver: bridge
